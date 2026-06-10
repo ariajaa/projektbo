@@ -1,4 +1,4 @@
-#python
+#python id="p1r5zt"
 import streamlit as st
 from chatbot import ask_gemini
 import random
@@ -16,14 +16,21 @@ st.set_page_config(
 # DATABASE SEMENTARA
 # =========================
 if "data_resi" not in st.session_state:
+
     st.session_state.data_resi = {
 
         "FSA001": {
             "status": "Dalam Pengiriman",
-            "lokasi": "Bandung",
+            "lokasi": "Bekasi",
             "estimasi": "2 Hari Lagi",
             "pengirim": "Andi",
-            "penerima": "Budi"
+            "penerima": "Budi",
+
+            "tracking": [
+                "Paket diterima di Bandung",
+                "Paket tiba di Gudang Bekasi",
+                "Paket sedang menuju Jakarta"
+            ]
         },
 
         "FSA002": {
@@ -31,7 +38,13 @@ if "data_resi" not in st.session_state:
             "lokasi": "Jakarta",
             "estimasi": "Paket Diterima",
             "pengirim": "Sinta",
-            "penerima": "Rina"
+            "penerima": "Rina",
+
+            "tracking": [
+                "Paket diterima di Surabaya",
+                "Paket dikirim ke Jakarta",
+                "Paket diterima oleh penerima"
+            ]
         },
 
         "FSA003": {
@@ -39,10 +52,18 @@ if "data_resi" not in st.session_state:
             "lokasi": "Gudang Bekasi",
             "estimasi": "Menunggu Pengiriman",
             "pengirim": "Doni",
-            "penerima": "Agus"
+            "penerima": "Agus",
+
+            "tracking": [
+                "Paket diterima di Bekasi",
+                "Cuaca buruk menyebabkan keterlambatan"
+            ]
         }
     }
 
+# =========================
+# RIWAYAT PENGIRIMAN
+# =========================
 if "riwayat_pengiriman" not in st.session_state:
     st.session_state.riwayat_pengiriman = []
 
@@ -212,10 +233,18 @@ elif menu == "Tracking Resi":
                 st.write("### Detail Pengiriman")
 
                 st.write(f"📦 Status : {hasil['status']}")
-                st.write(f"📍 Lokasi : {hasil['lokasi']}")
+                st.write(f"📍 Lokasi Saat Ini : {hasil['lokasi']}")
                 st.write(f"🕒 Estimasi : {hasil['estimasi']}")
                 st.write(f"👤 Pengirim : {hasil['pengirim']}")
                 st.write(f"👥 Penerima : {hasil['penerima']}")
+
+                st.divider()
+
+                st.write("### 🚚 Riwayat Perjalanan Paket")
+
+                for item in hasil["tracking"]:
+
+                    st.write(f"✅ {item}")
 
             else:
                 st.error("Nomor resi tidak ditemukan")
@@ -235,6 +264,10 @@ elif menu == "Pengiriman Barang":
         pengirim = st.text_input("Nama Pengirim")
 
         penerima = st.text_input("Nama Penerima")
+
+        kota_asal = st.text_input("Kota Asal")
+
+        kota_tujuan = st.text_input("Kota Tujuan")
 
         alamat = st.text_area("Alamat Tujuan")
 
@@ -260,25 +293,38 @@ elif menu == "Pengiriman Barang":
 
         if submit:
 
-            # GENERATE RESI
             nomor_resi = "FSA" + str(
                 random.randint(100, 999)
             )
 
-            # SIMPAN DATA TRACKING
+            # SIMPAN TRACKING
             st.session_state.data_resi[nomor_resi] = {
+
                 "status": "Dalam Pengiriman",
-                "lokasi": "Gudang Utama",
+
+                "lokasi": kota_asal,
+
                 "estimasi": "3 Hari Lagi",
+
                 "pengirim": pengirim,
-                "penerima": penerima
+
+                "penerima": penerima,
+
+                "tracking": [
+                    f"Paket diterima di {kota_asal}",
+                    f"Paket sedang dikirim menuju {kota_tujuan}"
+                ]
             }
 
             # SIMPAN RIWAYAT
             st.session_state.riwayat_pengiriman.append({
+
                 "resi": nomor_resi,
+
                 "pengirim": pengirim,
+
                 "penerima": penerima,
+
                 "barang": barang
             })
 
@@ -294,6 +340,14 @@ elif menu == "Pengiriman Barang":
 
             st.write(
                 f"👥 Penerima : {penerima}"
+            )
+
+            st.write(
+                f"📍 Dari : {kota_asal}"
+            )
+
+            st.write(
+                f"🎯 Tujuan : {kota_tujuan}"
             )
 
             st.write(
