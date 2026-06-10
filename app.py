@@ -1,4 +1,4 @@
-#python id="mz0h2e"
+#python
 import streamlit as st
 from chatbot import ask_gemini
 import random
@@ -17,6 +17,7 @@ st.set_page_config(
 # =========================
 if "data_resi" not in st.session_state:
     st.session_state.data_resi = {
+
         "FSA001": {
             "status": "Dalam Pengiriman",
             "lokasi": "Bandung",
@@ -190,6 +191,10 @@ elif menu == "Tracking Resi":
 
     st.subheader("📍 Tracking Resi")
 
+    st.write(
+        "Gunakan nomor resi untuk melihat status pengiriman."
+    )
+
     resi = st.text_input(
         "Masukkan Nomor Resi"
     )
@@ -249,33 +254,27 @@ elif menu == "Pengiriman Barang":
             min_value=1
         )
 
-        status = st.selectbox(
-            "Status Pengiriman",
-            [
-                "Dalam Pengiriman",
-                "Sudah Sampai",
-                "Tertunda"
-            ]
-        )
-
         submit = st.form_submit_button(
             "Kirim Barang"
         )
 
         if submit:
 
+            # GENERATE RESI
             nomor_resi = "FSA" + str(
                 random.randint(100, 999)
             )
 
+            # SIMPAN DATA TRACKING
             st.session_state.data_resi[nomor_resi] = {
-                "status": status,
+                "status": "Dalam Pengiriman",
                 "lokasi": "Gudang Utama",
                 "estimasi": "3 Hari Lagi",
                 "pengirim": pengirim,
                 "penerima": penerima
             }
 
+            # SIMPAN RIWAYAT
             st.session_state.riwayat_pengiriman.append({
                 "resi": nomor_resi,
                 "pengirim": pengirim,
@@ -285,6 +284,24 @@ elif menu == "Pengiriman Barang":
 
             st.success(
                 "Pengiriman berhasil dibuat"
+            )
+
+            st.write("### Detail Pengiriman")
+
+            st.write(
+                f"👤 Pengirim : {pengirim}"
+            )
+
+            st.write(
+                f"👥 Penerima : {penerima}"
+            )
+
+            st.write(
+                f"📦 Barang : {barang}"
+            )
+
+            st.write(
+                f"⚖️ Berat : {berat} Kg"
             )
 
             st.info(
@@ -318,6 +335,10 @@ elif menu == "Riwayat Pengiriman":
 elif menu == "Chatbot AI":
 
     st.subheader("🤖 Chatbot Customer Service AI")
+
+    st.write(
+        "Tanyakan seputar pengiriman, estimasi barang, dan layanan logistik."
+    )
 
     prompt = st.text_input(
         "Masukkan Pertanyaan"
