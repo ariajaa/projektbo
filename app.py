@@ -1,4 +1,3 @@
-#python id="p1r5zt"
 import streamlit as st
 from chatbot import ask_gemini
 import random
@@ -94,6 +93,7 @@ menu = st.sidebar.selectbox(
         "Dashboard",
         "Tracking Resi",
         "Pengiriman Barang",
+        "Update Status Paket",
         "Riwayat Pengiriman",
         "Chatbot AI"
     ]
@@ -136,9 +136,7 @@ if menu == "Dashboard":
 
     st.divider()
 
-    # =========================
     # PAKET DIPROSES
-    # =========================
     st.write("## 🚚 Paket Diproses")
 
     ada_data = False
@@ -159,9 +157,7 @@ if menu == "Dashboard":
     if not ada_data:
         st.info("Tidak ada paket diproses")
 
-    # =========================
     # PAKET TERKIRIM
-    # =========================
     st.write("## ✅ Paket Terkirim")
 
     ada_data = False
@@ -182,9 +178,7 @@ if menu == "Dashboard":
     if not ada_data:
         st.info("Tidak ada paket terkirim")
 
-    # =========================
     # PAKET TERTUNDA
-    # =========================
     st.write("## ⏳ Paket Tertunda")
 
     ada_data = False
@@ -211,10 +205,6 @@ if menu == "Dashboard":
 elif menu == "Tracking Resi":
 
     st.subheader("📍 Tracking Resi")
-
-    st.write(
-        "Gunakan nomor resi untuk melihat status pengiriman."
-    )
 
     resi = st.text_input(
         "Masukkan Nomor Resi"
@@ -297,7 +287,6 @@ elif menu == "Pengiriman Barang":
                 random.randint(100, 999)
             )
 
-            # SIMPAN TRACKING
             st.session_state.data_resi[nomor_resi] = {
 
                 "status": "Dalam Pengiriman",
@@ -316,7 +305,6 @@ elif menu == "Pengiriman Barang":
                 ]
             }
 
-            # SIMPAN RIWAYAT
             st.session_state.riwayat_pengiriman.append({
 
                 "resi": nomor_resi,
@@ -332,35 +320,58 @@ elif menu == "Pengiriman Barang":
                 "Pengiriman berhasil dibuat"
             )
 
-            st.write("### Detail Pengiriman")
-
-            st.write(
-                f"👤 Pengirim : {pengirim}"
-            )
-
-            st.write(
-                f"👥 Penerima : {penerima}"
-            )
-
-            st.write(
-                f"📍 Dari : {kota_asal}"
-            )
-
-            st.write(
-                f"🎯 Tujuan : {kota_tujuan}"
-            )
-
-            st.write(
-                f"📦 Barang : {barang}"
-            )
-
-            st.write(
-                f"⚖️ Berat : {berat} Kg"
-            )
-
             st.info(
                 f"Nomor Resi Anda : {nomor_resi}"
             )
+
+# =========================
+# UPDATE STATUS PAKET
+# =========================
+elif menu == "Update Status Paket":
+
+    st.subheader("🛠 Update Status Paket")
+
+    daftar_resi = list(
+        st.session_state.data_resi.keys()
+    )
+
+    pilih_resi = st.selectbox(
+        "Pilih Nomor Resi",
+        daftar_resi
+    )
+
+    status_baru = st.selectbox(
+        "Update Status",
+        [
+            "Dalam Pengiriman",
+            "Sudah Sampai",
+            "Tertunda"
+        ]
+    )
+
+    lokasi_baru = st.text_input(
+        "Lokasi Paket Saat Ini"
+    )
+
+    if st.button("Update Paket"):
+
+        st.session_state.data_resi[pilih_resi][
+            "status"
+        ] = status_baru
+
+        st.session_state.data_resi[pilih_resi][
+            "lokasi"
+        ] = lokasi_baru
+
+        st.session_state.data_resi[pilih_resi][
+            "tracking"
+        ].append(
+            f"Status diperbarui menjadi {status_baru} di {lokasi_baru}"
+        )
+
+        st.success(
+            "Status paket berhasil diperbarui"
+        )
 
 # =========================
 # RIWAYAT PENGIRIMAN
