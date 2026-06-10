@@ -1,4 +1,4 @@
-#python
+#python id="mz0h2e"
 import streamlit as st
 from chatbot import ask_gemini
 import random
@@ -20,17 +20,48 @@ if "data_resi" not in st.session_state:
         "FSA001": {
             "status": "Dalam Pengiriman",
             "lokasi": "Bandung",
-            "estimasi": "2 Hari Lagi"
+            "estimasi": "2 Hari Lagi",
+            "pengirim": "Andi",
+            "penerima": "Budi"
         },
+
         "FSA002": {
             "status": "Sudah Sampai",
             "lokasi": "Jakarta",
-            "estimasi": "Paket Diterima"
+            "estimasi": "Paket Diterima",
+            "pengirim": "Sinta",
+            "penerima": "Rina"
+        },
+
+        "FSA003": {
+            "status": "Tertunda",
+            "lokasi": "Gudang Bekasi",
+            "estimasi": "Menunggu Pengiriman",
+            "pengirim": "Doni",
+            "penerima": "Agus"
         }
     }
 
 if "riwayat_pengiriman" not in st.session_state:
     st.session_state.riwayat_pengiriman = []
+
+# =========================
+# HITUNG STATUS
+# =========================
+diproses = 0
+terkirim = 0
+tertunda = 0
+
+for data in st.session_state.data_resi.values():
+
+    if data["status"] == "Dalam Pengiriman":
+        diproses += 1
+
+    elif data["status"] == "Sudah Sampai":
+        terkirim += 1
+
+    elif data["status"] == "Tertunda":
+        tertunda += 1
 
 # =========================
 # SIDEBAR
@@ -66,19 +97,91 @@ if menu == "Dashboard":
         len(st.session_state.data_resi)
     )
 
-    col2.metric("Diproses", "12")
-    col3.metric("Terkirim", "20")
-    col4.metric("Tertunda", "3")
+    col2.metric(
+        "Diproses",
+        diproses
+    )
+
+    col3.metric(
+        "Terkirim",
+        terkirim
+    )
+
+    col4.metric(
+        "Tertunda",
+        tertunda
+    )
 
     st.divider()
 
-    st.info("Sistem logistik berjalan dengan normal.")
+    # =========================
+    # PAKET DIPROSES
+    # =========================
+    st.write("## 🚚 Paket Diproses")
 
-    st.write("### Aktivitas Hari Ini")
+    ada_data = False
 
-    st.write("- 15 paket berhasil dikirim")
-    st.write("- 7 paket sedang diproses")
-    st.write("- 2 paket mengalami keterlambatan")
+    for resi, data in st.session_state.data_resi.items():
+
+        if data["status"] == "Dalam Pengiriman":
+
+            ada_data = True
+
+            st.write(f"📦 Resi : {resi}")
+            st.write(f"👤 Pengirim : {data['pengirim']}")
+            st.write(f"👥 Penerima : {data['penerima']}")
+            st.write(f"📍 Lokasi : {data['lokasi']}")
+
+            st.divider()
+
+    if not ada_data:
+        st.info("Tidak ada paket diproses")
+
+    # =========================
+    # PAKET TERKIRIM
+    # =========================
+    st.write("## ✅ Paket Terkirim")
+
+    ada_data = False
+
+    for resi, data in st.session_state.data_resi.items():
+
+        if data["status"] == "Sudah Sampai":
+
+            ada_data = True
+
+            st.write(f"📦 Resi : {resi}")
+            st.write(f"👤 Pengirim : {data['pengirim']}")
+            st.write(f"👥 Penerima : {data['penerima']}")
+            st.write(f"📍 Lokasi : {data['lokasi']}")
+
+            st.divider()
+
+    if not ada_data:
+        st.info("Tidak ada paket terkirim")
+
+    # =========================
+    # PAKET TERTUNDA
+    # =========================
+    st.write("## ⏳ Paket Tertunda")
+
+    ada_data = False
+
+    for resi, data in st.session_state.data_resi.items():
+
+        if data["status"] == "Tertunda":
+
+            ada_data = True
+
+            st.write(f"📦 Resi : {resi}")
+            st.write(f"👤 Pengirim : {data['pengirim']}")
+            st.write(f"👥 Penerima : {data['penerima']}")
+            st.write(f"📍 Lokasi : {data['lokasi']}")
+
+            st.divider()
+
+    if not ada_data:
+        st.info("Tidak ada paket tertunda")
 
 # =========================
 # TRACKING RESI
@@ -86,10 +189,6 @@ if menu == "Dashboard":
 elif menu == "Tracking Resi":
 
     st.subheader("📍 Tracking Resi")
-
-    st.write(
-        "Gunakan nomor resi untuk melihat status pengiriman."
-    )
 
     resi = st.text_input(
         "Masukkan Nomor Resi"
@@ -107,17 +206,11 @@ elif menu == "Tracking Resi":
 
                 st.write("### Detail Pengiriman")
 
-                st.write(
-                    f"📦 Status : {hasil['status']}"
-                )
-
-                st.write(
-                    f"📍 Lokasi : {hasil['lokasi']}"
-                )
-
-                st.write(
-                    f"🕒 Estimasi : {hasil['estimasi']}"
-                )
+                st.write(f"📦 Status : {hasil['status']}")
+                st.write(f"📍 Lokasi : {hasil['lokasi']}")
+                st.write(f"🕒 Estimasi : {hasil['estimasi']}")
+                st.write(f"👤 Pengirim : {hasil['pengirim']}")
+                st.write(f"👥 Penerima : {hasil['penerima']}")
 
             else:
                 st.error("Nomor resi tidak ditemukan")
@@ -156,25 +249,33 @@ elif menu == "Pengiriman Barang":
             min_value=1
         )
 
+        status = st.selectbox(
+            "Status Pengiriman",
+            [
+                "Dalam Pengiriman",
+                "Sudah Sampai",
+                "Tertunda"
+            ]
+        )
+
         submit = st.form_submit_button(
             "Kirim Barang"
         )
 
         if submit:
 
-            # GENERATE RESI
             nomor_resi = "FSA" + str(
                 random.randint(100, 999)
             )
 
-            # SIMPAN TRACKING
             st.session_state.data_resi[nomor_resi] = {
-                "status": "Sedang Diproses",
+                "status": status,
                 "lokasi": "Gudang Utama",
-                "estimasi": "3 Hari Lagi"
+                "estimasi": "3 Hari Lagi",
+                "pengirim": pengirim,
+                "penerima": penerima
             }
 
-            # SIMPAN RIWAYAT
             st.session_state.riwayat_pengiriman.append({
                 "resi": nomor_resi,
                 "pengirim": pengirim,
@@ -184,24 +285,6 @@ elif menu == "Pengiriman Barang":
 
             st.success(
                 "Pengiriman berhasil dibuat"
-            )
-
-            st.write("### Detail Pengiriman")
-
-            st.write(
-                f"👤 Pengirim : {pengirim}"
-            )
-
-            st.write(
-                f"👥 Penerima : {penerima}"
-            )
-
-            st.write(
-                f"📦 Barang : {barang}"
-            )
-
-            st.write(
-                f"⚖️ Berat : {berat} Kg"
             )
 
             st.info(
@@ -219,25 +302,12 @@ elif menu == "Riwayat Pengiriman":
 
         for item in st.session_state.riwayat_pengiriman:
 
-            with st.container():
+            st.write(f"📦 Resi : {item['resi']}")
+            st.write(f"👤 Pengirim : {item['pengirim']}")
+            st.write(f"👥 Penerima : {item['penerima']}")
+            st.write(f"🛍 Barang : {item['barang']}")
 
-                st.write(
-                    f"📦 Resi : {item['resi']}"
-                )
-
-                st.write(
-                    f"👤 Pengirim : {item['pengirim']}"
-                )
-
-                st.write(
-                    f"👥 Penerima : {item['penerima']}"
-                )
-
-                st.write(
-                    f"🛍 Barang : {item['barang']}"
-                )
-
-                st.divider()
+            st.divider()
 
     else:
         st.info("Belum ada riwayat pengiriman")
@@ -248,10 +318,6 @@ elif menu == "Riwayat Pengiriman":
 elif menu == "Chatbot AI":
 
     st.subheader("🤖 Chatbot Customer Service AI")
-
-    st.write(
-        "Tanyakan seputar pengiriman, layanan, atau estimasi barang."
-    )
 
     prompt = st.text_input(
         "Masukkan Pertanyaan"
@@ -273,4 +339,3 @@ elif menu == "Chatbot AI":
             st.warning(
                 "Masukkan pertanyaan terlebih dahulu"
             )
-
