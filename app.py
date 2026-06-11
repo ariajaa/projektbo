@@ -6,7 +6,7 @@ import random
 # CONFIG
 # =========================
 st.set_page_config(
-    page_title="FSA Logistics AI",
+    page_title="FSA Logistics",
     page_icon="📦",
     layout="wide"
 )
@@ -102,8 +102,8 @@ menu = st.sidebar.selectbox(
 # =========================
 # HEADER
 # =========================
-st.title("📦 FSA Logistics AI")
-st.caption("Sistem Logistik dan Pengiriman Barang Berbasis AI")
+st.title("📦 FSA Logistics")
+st.caption("Sistem Logistik dan Pengiriman Barang")
 
 # =========================
 # DASHBOARD
